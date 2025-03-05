@@ -29,9 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fooddelivery.ui.theme.ColorYellow
 
-@Preview
 @Composable
-fun WelcomeScreen(){
+fun WelcomeScreen(
+    onNextButtonClick: () -> Unit
+){
         Column (
             modifier = Modifier
                 .fillMaxSize(),
@@ -51,7 +52,9 @@ fun WelcomeScreen(){
                 modifier = Modifier
                     .width(306.dp)
                     .height(66.dp),
-                onClick = {},
+                onClick = {
+
+                },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ColorYellow,

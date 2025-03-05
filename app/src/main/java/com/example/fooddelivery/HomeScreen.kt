@@ -1,6 +1,8 @@
 package com.example.fooddelivery
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,11 +30,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
@@ -38,7 +46,6 @@ import com.example.fooddelivery.ui.theme.TextRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
 fun HomeScreen(){
     Scaffold(
@@ -138,6 +145,7 @@ fun HomeScreen(){
             }
         }
     ) {
+        val image = "https://ru.freepik.com/free-photo/delicious-dumplings-with-cherries-jam_6799960.htm#fromView=keyword&page=1&position=3&uuid=e024da4f-15e7-4c96-8347-a88fb6c91ee5&query=Russian+Cuisine"
         val text = "Search restaurants"
         LazyColumn (modifier = Modifier.fillMaxSize().padding(it)){
             item {
@@ -160,11 +168,41 @@ fun HomeScreen(){
             item {
                 Row (
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ){
+                    filterElements()
                 }
             }
         }
+
+    }
+}
+@Composable
+fun filterElements(){
+    repeat(4){
+        Column{
+            Box(
+                modifier = Modifier
+                    .size(56.dp, 56.dp)
+                    .background(Color.Red)
+            )
+            Text(
+                modifier = Modifier
+                    .width(56.dp),
+                text = "Filter",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+@Preview
+@Composable
+fun restaurantCard(){
+    Card (
+        
+    ){
 
     }
 }
