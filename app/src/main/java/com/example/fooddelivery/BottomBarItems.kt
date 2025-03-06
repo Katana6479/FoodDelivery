@@ -12,12 +12,8 @@ sealed class BottomBarItems(
     val name: String
 ) {
     data object Home: BottomBarItems(
-        icon = R.drawable.home,
+        icon = R.drawable.baseline_home_filled_24,
         name = "Home"
-    )
-    data object Search: BottomBarItems(
-        icon = R.drawable.search,
-        name = "Search"
     )
     data object Favorite: BottomBarItems(
         icon = R.drawable.star,
