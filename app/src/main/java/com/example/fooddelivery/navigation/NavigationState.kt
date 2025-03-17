@@ -13,7 +13,11 @@ class NavigationState(
         screen: String
     ){
         navHostController.navigate(screen){
-            popUpTo(navHostController.graph.findStartDestination().id)
+            popUpTo(navHostController.graph.findStartDestination().id){
+                saveState
+            }
+            launchSingleTop= true
+            restoreState = true
         }
     }
 
