@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,12 +23,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
@@ -72,44 +77,66 @@ fun HomeScreen(
         ){
             item {
                 val keyboardController = LocalSoftwareKeyboardController.current
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    value = viewModel.textFieldState.value,
-                    placeholder = {
-                        Text(text = "Найдите ресторан")
-                    },
-                    singleLine = true,
-                    onValueChange = {newValue->
-                        viewModel.updateState(newValue)
-                        clearButtonVisibilityState.value=true
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = LoginFieldColor,
-                        unfocusedBorderColor = LoginFieldBorderColor,
-                        unfocusedTextColor = LoginFieldTextColor
-                    ),
-                    leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null)},
-                    trailingIcon = {
-                        if(viewModel.textFieldState.value !=""&& clearButtonVisibilityState.value){
-                            Text(
-                                text = "Сброс",
-                                modifier = Modifier
-                                    .padding(end = 4.dp)
-                                    .clickable(
-                                        onClick = {
-                                            viewModel.textFieldState.value=""
-                                            keyboardController?.hide()
-                                        }
-                                    )
+                val suggestions = remember { mutableStateListOf("Москва, Белый Кролик", "Люберцы, Нани", "Москва, The Бык", "Москва, Frank By Basta") }
+                val showSuggestions = remember { mutableStateOf(false) }
+                Box(){
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        value = viewModel.textFieldState.value,
+                        placeholder = {
+                            Text(text = "Найдите ресторан")
+                        },
+                        singleLine = true,
+                        onValueChange = {newValue->
+                            viewModel.updateState(newValue)
+                            clearButtonVisibilityState.value=true
+                            showSuggestions.value = newValue.isNotEmpty()
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = LoginFieldColor,
+                            unfocusedBorderColor = LoginFieldBorderColor,
+                            unfocusedTextColor = LoginFieldTextColor
+                        ),
+                        leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null)},
+                        trailingIcon = {
+                            if(viewModel.textFieldState.value !=""&& clearButtonVisibilityState.value){
+                                Text(
+                                    text = "Сброс",
+                                    modifier = Modifier
+                                        .padding(end = 4.dp)
+                                        .clickable(
+                                            onClick = {
+                                                viewModel.textFieldState.value=""
+                                                keyboardController?.hide()
+                                                showSuggestions.value = false
+                                            }
+                                        )
                                 )
-                        }else{
-                            Text(text="")
+                            }else{
+                                Text(text="")
+                            }
+                        },
+                        shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
+                    )
+                    DropdownMenu(
+                        expanded = showSuggestions.value,
+                        onDismissRequest = { showSuggestions.value = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        properties = PopupProperties(focusable = false)
+                    ) {
+                        suggestions.forEach { suggestion ->
+                            DropdownMenuItem(
+                                text = { Text(text = suggestion) },
+                                onClick = {
+                                    viewModel.textFieldState.value = suggestion
+                                    showSuggestions.value = false
+                                }
+                            )
                         }
-                    },
-                    shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
-                )
+                    }
+                }
             }
             item {
                 Row (
@@ -119,25 +146,25 @@ fun HomeScreen(
                 ){
                     DisplayImage(
                         link = "https://eda.yandex/images/1380157/fd0b8c91c2c2a137020053cb3c35c37c-1100x825.jpg",
-                        categoryName = "Burgers"
+                        categoryName = "Бургеры"
                     )
                     DisplayImage(
                         link = "https://eda.yandex/images/3377781/0bd6643e4c33621295ef9862e55f95d7-1100x825.jpg",
-                        categoryName = "Sushi"
+                        categoryName = "Суши"
                     )
                     DisplayImage(
                         link = "https://cdn.kobo.com/book-images/cccc79b9-58cc-488a-a2a0-6db53b84114f/1200/1200/False/the-healthy-90.jpg",
-                        categoryName = "Fish"
+                        categoryName = "Рыба"
                     )
                     DisplayImage(
-                        link = "https://s3-alpha-sig.figma.com/img/0b1f/dca5/91958ec12f346cb35741dc7c7d1c69f7?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=jC5WfW6-hTq4Ie~D8sI3yh5iZf9eBLaZYIgx7lxWXXmP~aU0ATUIvOJcGDfh~pUHoGh0l-1zcbqsPFXh05NXWukuwWOOf0E6qUVmex2Yc9hW7BUceJ6jbe8LOH0t0axceNDkOwc2NgLmnK0sInxAcrr3M2i2xGofRqUluNjiqOAQHWtBVwAjqSHlIB2iB3mMNpbJUPCOk2hUMzwL3wycJPQZyqf4xVIDyCnHvkOPH9olhKW8fIRqtILxRTAKekrUeGx1Cl-CSJ1mdbu2XZBANPgdyO6pyQneZ5KW-ZF2dhCK7m9LDtapQBOxCoeAmq-51wACVT8etxlXtA4he2b72A__",
-                        categoryName = "Pizza"
+                        link = "https://images.deliveryhero.io/image/fd-pk/LH/lbex-hero.jpg",
+                        categoryName = "Пицца"
                     )
                 }
             }
             items(10){
                 RestaurantCard(
-                    link = "https://s3-alpha-sig.figma.com/img/9fb1/7973/baf6df6d95b6eec91309822538dce32c?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=WOcpyBJvRHJnnWevp2yv8m-mP1Z3ju908R-V-R2nlUSAXkvFrMHgrxfm4vn1z5y6b5DIC-Mnktqh4wfyGt3-ZxcXwZ4YZQgGHBA7Ch-pCyqc~rm63h417Y~TGe2wFA8Zr2pCjT5VK9wdeYBBVBHwEZ342QdtmINdREqF4KrgN~CyhlOxz-A3Nb7742yPpfzoIOZS4YWVIGea2cMDLMAXkngXkAKraR9xnxpc8XZBU1Yi~vBN3IvF9wBY004L29Xe2b~HEEOJtRV9iPnOt3eLefOKYN4t6oUzVqpg1Rm9ly22iPiklqhI~UIrwHGIx745dAgfKUwnd~5rHiClm7J4Qg__"
+                    link = "https://s3-alpha-sig.figma.com/img/9fb1/7973/baf6df6d95b6eec91309822538dce32c?Expires=1743379200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=IXYixta32L6Es7ajoPMbwcjiWlEJaX0s5Rx9e1iLodXwpEthBg6E4Du0bC-S5kzXg8cZzvlxXLOR5izYOkgTF6e3RD3DcIfEudHxGbDZoEHLRB0uMffyO4l2cBsVXwhfHz8TZ23cWbSShvnIpwzKp3URUO1hUbyeZR1TRV7Zb4uaxc~PX7U2m7i2ET6FnUv9RhBuFxwNp0pvDgBIijDaisoVC12VTCqRLxhOCULay3Tu8fKAkNbXQvldfVd8PkjX8b2C8tFN~gQQJj6vhO2sIiZ~QEZ-2wfbYJXj7QssIL~VdHIpNmn1ohIBUJIA1fiHlaKtr-7zwUI73lKuWoYYEA__"
                 )
             }
 
@@ -170,7 +197,7 @@ fun RestaurantCard(
             Text(
                 modifier = Modifier
                     .padding(start = 2.dp),
-                text = "Golden restaurant",
+                text = "Золотой ресторан",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W600
             )
@@ -180,7 +207,7 @@ fun RestaurantCard(
             Text(
                 modifier = Modifier
                     .padding(start = 2.dp),
-                text = "Chinese",
+                text = "Китайский",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W400
             )
@@ -201,7 +228,7 @@ fun RestaurantCard(
                     modifier = Modifier.width(8.dp)
                 )
                 Text(
-                    text = "45 min"
+                    text = "45 мин"
                 )
                 Icon(painter = painterResource(R.drawable.service_time),
                     modifier = Modifier.size(16.dp),
@@ -210,7 +237,7 @@ fun RestaurantCard(
                     modifier = Modifier.width(8.dp)
                 )
                 Text(
-                    text = "Reviews"
+                    text = "Отзывы"
                 )
                 Icon(Icons.Default.Info,
                     modifier = Modifier.size(16.dp),
@@ -241,7 +268,7 @@ fun DisplayImage(
         )
         Text(
             modifier = Modifier
-                .width(56.dp),
+                .width(58.dp),
             text = categoryName,
             textAlign = TextAlign.Center,
             fontSize = 14.sp

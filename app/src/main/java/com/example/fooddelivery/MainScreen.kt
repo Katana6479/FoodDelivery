@@ -65,7 +65,7 @@ fun MainScreen(){
                             Box(
                             ){
                                 Text(
-                                    text = "YOUR LOCATION",
+                                    text = "ВАША ЛОКАЦИЯ",
                                     color = TextRed,
                                     fontWeight = FontWeight.W400,
                                     fontSize = 14.sp
@@ -74,7 +74,7 @@ fun MainScreen(){
                             Box(
                             ){
                                 Text(
-                                    text = "Moscow, Red Square",
+                                    text = "Москва, Красная Площадь",
                                     color = Color.Black,
                                     fontWeight = FontWeight.W400,
                                     fontSize = 14.sp
