@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -44,6 +45,7 @@ fun LoginScreen(
     onSignInButtonClick: () -> Unit,
     onSignUpButtonClick: () -> Unit
 ){
+    val color = MaterialTheme.colorScheme.onBackground
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -59,16 +61,16 @@ fun LoginScreen(
                         .fillMaxHeight()
                         .weight(2f),
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(Color.Black)){
+                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
                             append("Just ")
                         }
                         withStyle(style = SpanStyle(TextRed)){
                             append("Sign in ")
                         }
-                        withStyle(style = SpanStyle(Color.Black)){
+                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
                             append("we’ll"+"\n")
                         }
-                        withStyle(style = SpanStyle(Color.Black)){
+                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
                             append("prepare your order")
                         }
                     },

@@ -9,12 +9,15 @@ sealed class Screens(
     object HomeScreen:Screens(DESTINATION_HOME)
     object ProfileScreen:Screens(DESTINATION_PROFILE)
     object FavoriteScreen:Screens(DESTINATION_FAVORITE)
-    companion object{
+    object MainGraph:Screens(DESTINATION_MAIN_GRAPH)
+    private companion object{
         const val DESTINATION_WELCOME = "welcome"
         const val DESTINATION_LOGIN = "login"
         const val DESTINATION_SIGNUP = "signup"
         const val DESTINATION_HOME = "home"
         const val DESTINATION_FAVORITE = "favorite"
         const val DESTINATION_PROFILE = "profile"
+
+        const val DESTINATION_MAIN_GRAPH = "main_graph"
     }
 }

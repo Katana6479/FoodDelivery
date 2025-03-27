@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -58,13 +59,13 @@ fun SignUpScreen (
                         .fillMaxHeight()
                         .weight(2f),
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(Color.Black)){
+                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
                             append("Let’s ")
                         }
                         withStyle(style = SpanStyle(TextRed)){
                             append("Sign you up")
                         }
-                        withStyle(style = SpanStyle(Color.Black)){
+                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
                             append(",\n" + "your meal awaits")
                         }
                     },

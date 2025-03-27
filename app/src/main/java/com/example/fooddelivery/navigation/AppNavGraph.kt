@@ -19,23 +19,17 @@ fun AppNavGraph(
         navController = navHostController,
         startDestination = Screens.WelcomeScreen.route
     ) {
-        composable(Screens.DESTINATION_WELCOME){
+        composable(Screens.WelcomeScreen.route){
             welcomeScreenContent()
         }
-        composable(Screens.DESTINATION_LOGIN){
-            loginScreenContent()
-        }
-        composable(Screens.DESTINATION_SIGNUP){
-            signUpScreenContent()
-        }
-        composable(Screens.DESTINATION_HOME){
-            homeScreenContent()
-        }
-        composable(Screens.DESTINATION_PROFILE){
-            profileScreenContent()
-        }
-        composable(Screens.DESTINATION_FAVORITE){
-            favoritesScreenContent()
-        }
+        loginScreenNavGraph(
+            loginScreenContent = loginScreenContent,
+            signUpScreenContent = signUpScreenContent
+        )
+        mainScreenNavGraph (
+            homeScreenContent = homeScreenContent,
+            profileScreenContent = profileScreenContent,
+            favoritesScreenContent = favoritesScreenContent
+        )
     }
 }

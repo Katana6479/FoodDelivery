@@ -55,6 +55,7 @@ import com.example.fooddelivery.HomeViewModel
 import com.example.fooddelivery.R
 import com.example.fooddelivery.navigation.Screens
 import com.example.fooddelivery.navigation.rememberNavigationState
+import com.example.fooddelivery.retrofit.Restaurant
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
@@ -66,109 +67,117 @@ fun HomeScreen(
     paddingValues: PaddingValues
 ){
         val viewModel:HomeViewModel = viewModel()
-        val clearButtonVisibilityState = rememberSaveable{ mutableStateOf(false) }
-        val listState = rememberLazyListState()
-        LazyColumn (
-            state = listState,
-            modifier = Modifier.
-            fillMaxSize()
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            item {
-                val keyboardController = LocalSoftwareKeyboardController.current
-                val suggestions = remember { mutableStateListOf("Москва, Белый Кролик", "Люберцы, Нани", "Москва, The Бык", "Москва, Frank By Basta") }
-                val showSuggestions = remember { mutableStateOf(false) }
-                Box(){
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        value = viewModel.textFieldState.value,
-                        placeholder = {
-                            Text(text = "Найдите ресторан")
-                        },
-                        singleLine = true,
-                        onValueChange = {newValue->
-                            viewModel.updateState(newValue)
-                            clearButtonVisibilityState.value=true
-                            showSuggestions.value = newValue.isNotEmpty()
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = LoginFieldColor,
-                            unfocusedBorderColor = LoginFieldBorderColor,
-                            unfocusedTextColor = LoginFieldTextColor
-                        ),
-                        leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null)},
-                        trailingIcon = {
-                            if(viewModel.textFieldState.value !=""&& clearButtonVisibilityState.value){
-                                Text(
-                                    text = "Сброс",
-                                    modifier = Modifier
-                                        .padding(end = 4.dp)
-                                        .clickable(
-                                            onClick = {
-                                                viewModel.textFieldState.value=""
-                                                keyboardController?.hide()
-                                                showSuggestions.value = false
-                                            }
-                                        )
-                                )
-                            }else{
-                                Text(text="")
-                            }
-                        },
-                        shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
-                    )
-                    DropdownMenu(
-                        expanded = showSuggestions.value,
-                        onDismissRequest = { showSuggestions.value = false },
-                        modifier = Modifier.fillMaxWidth(),
-                        properties = PopupProperties(focusable = false)
-                    ) {
-                        suggestions.forEach { suggestion ->
-                            DropdownMenuItem(
-                                text = { Text(text = suggestion) },
-                                onClick = {
-                                    viewModel.textFieldState.value = suggestion
-                                    showSuggestions.value = false
-                                }
+        RestaurantsList(viewModel, paddingValues)
+}
+
+@Composable
+fun RestaurantsList(
+    viewModel:HomeViewModel,
+    paddingValues: PaddingValues
+){
+    val clearButtonVisibilityState = rememberSaveable{ mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    LazyColumn (
+        state = listState,
+        modifier = Modifier.
+        fillMaxSize()
+            .padding(paddingValues),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        item {
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val suggestions = remember { mutableStateListOf("Москва, Белый Кролик", "Люберцы, Нани", "Москва, The Бык", "Москва, Frank By Basta") }
+            val showSuggestions = remember { mutableStateOf(false) }
+            Box(){
+                OutlinedTextField(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = viewModel.textFieldState.value,
+                    placeholder = {
+                        Text(text = "Найдите ресторан")
+                    },
+                    singleLine = true,
+                    onValueChange = {newValue->
+                        viewModel.updateState(newValue)
+                        clearButtonVisibilityState.value=true
+                        showSuggestions.value = newValue.isNotEmpty()
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = LoginFieldColor,
+                        unfocusedBorderColor = LoginFieldBorderColor,
+                        unfocusedTextColor = LoginFieldTextColor
+                    ),
+                    leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null)},
+                    trailingIcon = {
+                        if(viewModel.textFieldState.value !=""&& clearButtonVisibilityState.value){
+                            Text(
+                                text = "Сброс",
+                                modifier = Modifier
+                                    .padding(end = 4.dp)
+                                    .clickable(
+                                        onClick = {
+                                            viewModel.textFieldState.value=""
+                                            keyboardController?.hide()
+                                            showSuggestions.value = false
+                                        }
+                                    )
                             )
+                        }else{
+                            Text(text="")
                         }
+                    },
+                    shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
+                )
+                DropdownMenu(
+                    expanded = showSuggestions.value,
+                    onDismissRequest = { showSuggestions.value = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    properties = PopupProperties(focusable = false)
+                ) {
+                    suggestions.forEach { suggestion ->
+                        DropdownMenuItem(
+                            text = { Text(text = suggestion) },
+                            onClick = {
+                                viewModel.textFieldState.value = suggestion
+                                showSuggestions.value = false
+                            }
+                        )
                     }
                 }
             }
-            item {
-                Row (
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    DisplayImage(
-                        link = "https://eda.yandex/images/1380157/fd0b8c91c2c2a137020053cb3c35c37c-1100x825.jpg",
-                        categoryName = "Бургеры"
-                    )
-                    DisplayImage(
-                        link = "https://eda.yandex/images/3377781/0bd6643e4c33621295ef9862e55f95d7-1100x825.jpg",
-                        categoryName = "Суши"
-                    )
-                    DisplayImage(
-                        link = "https://cdn.kobo.com/book-images/cccc79b9-58cc-488a-a2a0-6db53b84114f/1200/1200/False/the-healthy-90.jpg",
-                        categoryName = "Рыба"
-                    )
-                    DisplayImage(
-                        link = "https://images.deliveryhero.io/image/fd-pk/LH/lbex-hero.jpg",
-                        categoryName = "Пицца"
-                    )
-                }
-            }
-            items(10){
-                RestaurantCard(
-                    link = "https://s3-alpha-sig.figma.com/img/9fb1/7973/baf6df6d95b6eec91309822538dce32c?Expires=1743379200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=IXYixta32L6Es7ajoPMbwcjiWlEJaX0s5Rx9e1iLodXwpEthBg6E4Du0bC-S5kzXg8cZzvlxXLOR5izYOkgTF6e3RD3DcIfEudHxGbDZoEHLRB0uMffyO4l2cBsVXwhfHz8TZ23cWbSShvnIpwzKp3URUO1hUbyeZR1TRV7Zb4uaxc~PX7U2m7i2ET6FnUv9RhBuFxwNp0pvDgBIijDaisoVC12VTCqRLxhOCULay3Tu8fKAkNbXQvldfVd8PkjX8b2C8tFN~gQQJj6vhO2sIiZ~QEZ-2wfbYJXj7QssIL~VdHIpNmn1ohIBUJIA1fiHlaKtr-7zwUI73lKuWoYYEA__"
+        }
+        item {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ){
+                DisplayImage(
+                    link = "https://eda.yandex/images/1380157/fd0b8c91c2c2a137020053cb3c35c37c-1100x825.jpg",
+                    categoryName = "Бургеры"
+                )
+                DisplayImage(
+                    link = "https://eda.yandex/images/3377781/0bd6643e4c33621295ef9862e55f95d7-1100x825.jpg",
+                    categoryName = "Суши"
+                )
+                DisplayImage(
+                    link = "https://cdn.kobo.com/book-images/cccc79b9-58cc-488a-a2a0-6db53b84114f/1200/1200/False/the-healthy-90.jpg",
+                    categoryName = "Рыба"
+                )
+                DisplayImage(
+                    link = "https://images.deliveryhero.io/image/fd-pk/LH/lbex-hero.jpg",
+                    categoryName = "Пицца"
                 )
             }
-
         }
+        items(10){
+            RestaurantCard(
+                link = "https://s3-alpha-sig.figma.com/img/9fb1/7973/baf6df6d95b6eec91309822538dce32c?Expires=1743379200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=IXYixta32L6Es7ajoPMbwcjiWlEJaX0s5Rx9e1iLodXwpEthBg6E4Du0bC-S5kzXg8cZzvlxXLOR5izYOkgTF6e3RD3DcIfEudHxGbDZoEHLRB0uMffyO4l2cBsVXwhfHz8TZ23cWbSShvnIpwzKp3URUO1hUbyeZR1TRV7Zb4uaxc~PX7U2m7i2ET6FnUv9RhBuFxwNp0pvDgBIijDaisoVC12VTCqRLxhOCULay3Tu8fKAkNbXQvldfVd8PkjX8b2C8tFN~gQQJj6vhO2sIiZ~QEZ-2wfbYJXj7QssIL~VdHIpNmn1ohIBUJIA1fiHlaKtr-7zwUI73lKuWoYYEA__"
+            )
+        }
+
+    }
 }
 @Composable
 fun RestaurantCard(
