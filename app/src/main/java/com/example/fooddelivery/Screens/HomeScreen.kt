@@ -18,25 +18,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -46,16 +47,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
-import com.example.fooddelivery.HomeViewModel
+import com.example.fooddelivery.viewmodels.HomeViewModel
 import com.example.fooddelivery.R
-import com.example.fooddelivery.navigation.Screens
-import com.example.fooddelivery.navigation.rememberNavigationState
-import com.example.fooddelivery.retrofit.Restaurant
+import com.example.fooddelivery.ui.theme.ColorYellow
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
@@ -66,16 +64,7 @@ import com.example.fooddelivery.ui.theme.LoginFieldTextColor
 fun HomeScreen(
     paddingValues: PaddingValues
 ){
-        val viewModel:HomeViewModel = viewModel()
-        RestaurantsList(viewModel, paddingValues)
-}
-
-@Composable
-fun RestaurantsList(
-    viewModel:HomeViewModel,
-    paddingValues: PaddingValues
-){
-    val clearButtonVisibilityState = rememberSaveable{ mutableStateOf(false) }
+    val viewModel: HomeViewModel = viewModel()
     val listState = rememberLazyListState()
     LazyColumn (
         state = listState,
@@ -85,67 +74,9 @@ fun RestaurantsList(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         item {
-            val keyboardController = LocalSoftwareKeyboardController.current
-            val suggestions = remember { mutableStateListOf("Москва, Белый Кролик", "Люберцы, Нани", "Москва, The Бык", "Москва, Frank By Basta") }
-            val showSuggestions = remember { mutableStateOf(false) }
-            Box(){
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    value = viewModel.textFieldState.value,
-                    placeholder = {
-                        Text(text = "Найдите ресторан")
-                    },
-                    singleLine = true,
-                    onValueChange = {newValue->
-                        viewModel.updateState(newValue)
-                        clearButtonVisibilityState.value=true
-                        showSuggestions.value = newValue.isNotEmpty()
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = LoginFieldColor,
-                        unfocusedBorderColor = LoginFieldBorderColor,
-                        unfocusedTextColor = LoginFieldTextColor
-                    ),
-                    leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null)},
-                    trailingIcon = {
-                        if(viewModel.textFieldState.value !=""&& clearButtonVisibilityState.value){
-                            Text(
-                                text = "Сброс",
-                                modifier = Modifier
-                                    .padding(end = 4.dp)
-                                    .clickable(
-                                        onClick = {
-                                            viewModel.textFieldState.value=""
-                                            keyboardController?.hide()
-                                            showSuggestions.value = false
-                                        }
-                                    )
-                            )
-                        }else{
-                            Text(text="")
-                        }
-                    },
-                    shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
-                )
-                DropdownMenu(
-                    expanded = showSuggestions.value,
-                    onDismissRequest = { showSuggestions.value = false },
-                    modifier = Modifier.fillMaxWidth(),
-                    properties = PopupProperties(focusable = false)
-                ) {
-                    suggestions.forEach { suggestion ->
-                        DropdownMenuItem(
-                            text = { Text(text = suggestion) },
-                            onClick = {
-                                viewModel.textFieldState.value = suggestion
-                                showSuggestions.value = false
-                            }
-                        )
-                    }
-                }
-            }
+            SearchField(
+                viewModel
+            )
         }
         item {
             Row (
@@ -177,6 +108,88 @@ fun RestaurantsList(
             )
         }
 
+    }
+}
+
+@Composable
+fun SearchField(
+    viewModel: HomeViewModel
+    ){
+    val textFieldState = viewModel.textFieldState.collectAsState()
+    val clearButtonVisibilityState = viewModel.clearButtonState.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val suggestions = viewModel.searchHistoryList.collectAsState()
+    val showSuggestions = remember { mutableStateOf(false) }
+    Box(){
+        OutlinedTextField(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            value = textFieldState.value,
+            placeholder = {
+                Text(text = "Найдите ресторан")
+            },
+            singleLine = true,
+            onValueChange = {newValue->
+                viewModel.updateTextFieldState(newValue)
+                viewModel.updateClearButtonState(true)
+                showSuggestions.value = newValue.isNotEmpty()
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = LoginFieldColor,
+                unfocusedBorderColor = LoginFieldBorderColor,
+                unfocusedTextColor = LoginFieldTextColor
+            ),
+            trailingIcon = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if(textFieldState.value !=""&& clearButtonVisibilityState.value){
+                    Text(
+                        text = "Сброс",
+                        modifier = Modifier
+                            .padding(end = 4.dp)
+                            .clickable(
+                                onClick = {
+                                    viewModel.updateTextFieldState("")
+                                    keyboardController?.hide()
+                                    showSuggestions.value = false
+                                }
+                            )
+                    )
+                      }else{
+                       Text(text="")
+                      }
+                    IconButton (
+                        modifier = Modifier
+                            .clip(shape = RoundedCornerShape(30)),
+                        colors = IconButtonDefaults.iconButtonColors().copy(
+                            containerColor = ColorYellow
+                        ),
+                        onClick = {}
+                    ){
+                        Icon(painterResource(R.drawable.search), contentDescription = null)
+                    }
+                }
+            },
+            shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
+        )
+        DropdownMenu(
+            expanded = showSuggestions.value,
+            onDismissRequest = { showSuggestions.value = false },
+            modifier = Modifier.fillMaxWidth(),
+            properties = PopupProperties(focusable = false)
+        ) {
+            suggestions.value.forEach { suggestion ->
+                DropdownMenuItem(
+                    text = { Text(text = suggestion) },
+                    onClick = {
+                        viewModel.updateTextFieldState(suggestion)
+                        showSuggestions.value = false
+                    }
+                )
+            }
+        }
     }
 }
 @Composable
