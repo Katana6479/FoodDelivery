@@ -1,4 +1,4 @@
-package com.example.fooddelivery.Screens
+package com.example.fooddelivery.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
@@ -66,16 +68,19 @@ fun HomeScreen(
 ){
     val viewModel: HomeViewModel = viewModel()
     val listState = rememberLazyListState()
+    val searchHistory by viewModel.searchHistory.collectAsState()
+
     LazyColumn (
         state = listState,
-        modifier = Modifier.
-        fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         item {
             SearchField(
-                viewModel
+                viewModel,
+                searchHistory
             )
         }
         item {
@@ -113,14 +118,17 @@ fun HomeScreen(
 
 @Composable
 fun SearchField(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    searchHistory: Set<String>
     ){
     val textFieldState = viewModel.textFieldState.collectAsState()
     val clearButtonVisibilityState = viewModel.clearButtonState.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val suggestions = viewModel.searchHistoryList.collectAsState()
     val showSuggestions = remember { mutableStateOf(false) }
-    Box(){
+    Box(
+        modifier = Modifier
+        .fillMaxWidth()
+    ) {
         OutlinedTextField(
             modifier = Modifier
                 .padding(16.dp)
@@ -130,13 +138,13 @@ fun SearchField(
                 Text(text = "Найдите ресторан")
             },
             singleLine = true,
-            onValueChange = {newValue->
+            onValueChange = { newValue ->
                 viewModel.updateTextFieldState(newValue)
                 viewModel.updateClearButtonState(true)
                 showSuggestions.value = newValue.isNotEmpty()
             },
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = LoginFieldColor,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
                 unfocusedBorderColor = LoginFieldBorderColor,
                 unfocusedTextColor = LoginFieldTextColor
             ),
@@ -144,49 +152,76 @@ fun SearchField(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if(textFieldState.value !=""&& clearButtonVisibilityState.value){
-                    Text(
-                        text = "Сброс",
-                        modifier = Modifier
-                            .padding(end = 4.dp)
-                            .clickable(
-                                onClick = {
-                                    viewModel.updateTextFieldState("")
-                                    keyboardController?.hide()
-                                    showSuggestions.value = false
-                                }
-                            )
-                    )
-                      }else{
-                       Text(text="")
-                      }
-                    IconButton (
+                    if (textFieldState.value != "" && clearButtonVisibilityState.value) {
+                        Text(
+                            text = "Сброс",
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .clickable(
+                                    onClick = {
+                                        viewModel.updateTextFieldState("")
+                                        keyboardController?.hide()
+                                        showSuggestions.value = false
+                                    }
+                                )
+                        )
+                    } else {
+                        Text(text = "")
+                    }
+                    IconButton(
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(30)),
                         colors = IconButtonDefaults.iconButtonColors().copy(
                             containerColor = ColorYellow
                         ),
-                        onClick = {}
-                    ){
+                        onClick = {
+                            viewModel.addSearchQuery(textFieldState.value)
+                            keyboardController?.hide()
+                            showSuggestions.value = false
+                        }
+                    ) {
                         Icon(painterResource(R.drawable.search), contentDescription = null)
                     }
                 }
             },
             shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp))
         )
-        DropdownMenu(
-            expanded = showSuggestions.value,
-            onDismissRequest = { showSuggestions.value = false },
-            modifier = Modifier.fillMaxWidth(),
-            properties = PopupProperties(focusable = false)
-        ) {
-            suggestions.value.forEach { suggestion ->
-                DropdownMenuItem(
-                    text = { Text(text = suggestion) },
-                    onClick = {
-                        viewModel.updateTextFieldState(suggestion)
-                        showSuggestions.value = false
-                    }
+    }
+    if (searchHistory.isNotEmpty()){
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ){
+            DropdownMenu(
+                expanded = showSuggestions.value,
+                offset = DpOffset(x= 26.dp, y = (-18).dp),
+                modifier = Modifier.padding(end = 16.dp),
+                onDismissRequest = { showSuggestions.value = false },
+                properties = PopupProperties(focusable = false)
+            ) {
+                searchHistory.reversed().forEach { searchHistoryItem ->
+                    DropdownMenuItem(
+                        modifier = Modifier.width(320.dp),
+                        text = {
+                            Text(
+                                text = searchHistoryItem,
+                                fontWeight = FontWeight.W600)
+                               },
+                        onClick = {
+                            viewModel.updateTextFieldState(searchHistoryItem)
+                            keyboardController?.hide()
+                            showSuggestions.value = false
+                        }
+                    )
+                }
+                Text(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            viewModel.clearSearchHistory()
+                        },
+                    text = "Очистить историю",
+                    fontSize = 12.sp
                 )
             }
         }

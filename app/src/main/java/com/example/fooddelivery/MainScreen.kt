@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.fooddelivery.Screens.FavoritesScreen
-import com.example.fooddelivery.Screens.HomeScreen
-import com.example.fooddelivery.Screens.LoginScreen
-import com.example.fooddelivery.Screens.ProfileScreen
-import com.example.fooddelivery.Screens.SignUpScreen
-import com.example.fooddelivery.Screens.WelcomeScreen
+import com.example.fooddelivery.screens.FavoritesScreen
+import com.example.fooddelivery.screens.HomeScreen
+import com.example.fooddelivery.screens.LoginScreen
+import com.example.fooddelivery.screens.ProfileScreen
+import com.example.fooddelivery.screens.SignUpScreen
+import com.example.fooddelivery.screens.WelcomeScreen
 import com.example.fooddelivery.navigation.AppNavGraph
 import com.example.fooddelivery.navigation.Screens
 import com.example.fooddelivery.navigation.rememberNavigationState

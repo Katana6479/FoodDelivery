@@ -1,10 +1,8 @@
-package com.example.fooddelivery.Screens
+package com.example.fooddelivery.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,22 +30,20 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fooddelivery.ui.theme.ButtonBorderGrey
-import com.example.fooddelivery.ui.theme.ButtonTextBlack
-import com.example.fooddelivery.ui.theme.ButtonWhite
 import com.example.fooddelivery.ui.theme.ColorRed
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
+import com.example.fooddelivery.ui.theme.TermsClickable
+import com.example.fooddelivery.ui.theme.TermsColor
 import com.example.fooddelivery.ui.theme.TextRed
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LoginScreen(
-    onSignInButtonClick: () -> Unit,
-    onSignUpButtonClick: () -> Unit
+fun SignUpScreen (
+    onSignUpClick: ()-> Unit
 ){
-    val color = MaterialTheme.colorScheme.onBackground
+    Scaffold {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -62,16 +60,13 @@ fun LoginScreen(
                         .weight(2f),
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("Just ")
+                            append("Let’s ")
                         }
                         withStyle(style = SpanStyle(TextRed)){
-                            append("Sign in ")
+                            append("Sign you up")
                         }
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("we’ll"+"\n")
-                        }
-                        withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("prepare your order")
+                            append(",\n" + "your meal awaits")
                         }
                     },
                     fontSize = 24.sp,
@@ -101,6 +96,32 @@ fun LoginScreen(
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Column {
+                    Text(
+                        text = "Full name",
+                        fontWeight = FontWeight.W600,
+                    )
+                    val text = "Sam Smith"
+                    Spacer(modifier = Modifier.height(4.dp))
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = text,
+                        onValueChange = {},
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = LoginFieldColor,
+                            unfocusedBorderColor = LoginFieldBorderColor,
+                            unfocusedTextColor = LoginFieldTextColor
+                        )
+                    )
+                }
+            }
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
 
             Box(
                 modifier = Modifier
@@ -109,7 +130,7 @@ fun LoginScreen(
                 Column {
                     Text(
                         text = "Email",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.W600
                     )
                     val text = "foodhub@gmail.com"
                     Spacer(modifier = Modifier.height(4.dp))
@@ -121,13 +142,12 @@ fun LoginScreen(
                             unfocusedContainerColor = LoginFieldColor,
                             unfocusedBorderColor = LoginFieldBorderColor,
                             unfocusedTextColor = LoginFieldTextColor
-                            //unfocusedContainerColor = Color(0xFFEBEBEB)
                         )
                     )
                 }
             }
             Spacer(
-                modifier = Modifier.height(32.dp)
+                modifier = Modifier.height(16.dp)
             )
             Column (
                 modifier = Modifier
@@ -135,7 +155,7 @@ fun LoginScreen(
             ){
                 Text(
                     text = "Password",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.W600
                 )
                 val text = "****"
 
@@ -151,17 +171,6 @@ fun LoginScreen(
                     ),
                     visualTransformation = PasswordVisualTransformation()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.TopEnd
-                ){
-                    Text(
-                        text = "Forgot password?",
-                        color = LoginFieldTextColor
-                    )
-                }
             }
             Spacer(
                 modifier = Modifier.height(32.dp)
@@ -171,7 +180,7 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .height(53.dp),
                 onClick = {
-                    onSignInButtonClick()
+                    onSignUpClick()
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -180,62 +189,43 @@ fun LoginScreen(
                 )
             ) {
                 Text(
-                    text = "SIGN IN",
+                    text = "SIGN UP",
                     fontSize = 16.sp
                 )
             }
             Spacer(modifier = Modifier.height(40.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier.wrapContentHeight()
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ){
                 Text(
-                    text = "OR",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.W500
+                    text = "By signing up, you have agreed to our",
+                    color = TermsColor
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(53.dp),
-                    onClick = {
-                        onSignUpButtonClick()
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonWhite,
-                        contentColor = ButtonTextBlack
-                    ),
-                    border = BorderStroke(2.dp, ButtonBorderGrey)
-                ) {
-                    Text(
-                        text = "SIGN UP",
-                        fontSize = 16.sp
-                    )
-                }
             }
+            Box(
+                    modifier = Modifier.wrapContentHeight()
+                        .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+            ){
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(TermsClickable)){
+                        append("Terms and conditions")
+                    }
+                    withStyle(style = SpanStyle(TermsColor)){
+                        append(" & ")
+                    }
+                    withStyle(style = SpanStyle(TermsClickable)){
+                        append("Privacy policy")
+                    }
+                },
+                color = TermsClickable
+            )
+        }
+
 
         }
-}
-
-@Composable
-fun TopText(
-    paddingValues: PaddingValues,
-    ){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(72.dp)
-            .padding(paddingValues)
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(2f),
-            text = " Just Sign in,we’ll prepar your order",
-            fontSize = 24.sp
-        )
-        Box(modifier = Modifier.weight(1f))
     }
 }

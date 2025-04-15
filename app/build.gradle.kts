@@ -74,5 +74,6 @@ dependencies {
     implementation(libs.retrofit.v290)
     implementation(libs.gson)
     implementation (libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences)
 
 }

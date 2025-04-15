@@ -1,4 +1,4 @@
-package com.example.fooddelivery.Screens
+package com.example.fooddelivery.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
