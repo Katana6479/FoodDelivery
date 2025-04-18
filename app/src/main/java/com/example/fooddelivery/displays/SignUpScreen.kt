@@ -1,4 +1,4 @@
-package com.example.fooddelivery.screens
+package com.example.fooddelivery.displays
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box

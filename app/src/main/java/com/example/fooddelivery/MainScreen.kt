@@ -1,5 +1,6 @@
 package com.example.fooddelivery
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,28 +25,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.fooddelivery.screens.FavoritesScreen
-import com.example.fooddelivery.screens.HomeScreen
-import com.example.fooddelivery.screens.LoginScreen
-import com.example.fooddelivery.screens.ProfileScreen
-import com.example.fooddelivery.screens.SignUpScreen
-import com.example.fooddelivery.screens.WelcomeScreen
+import com.example.fooddelivery.displays.FavoritesScreen
+import com.example.fooddelivery.displays.HomeScreen
+import com.example.fooddelivery.displays.LoginScreen
+import com.example.fooddelivery.displays.ProfileScreen
+import com.example.fooddelivery.displays.SignUpScreen
+import com.example.fooddelivery.displays.WelcomeScreen
 import com.example.fooddelivery.navigation.AppNavGraph
 import com.example.fooddelivery.navigation.Screens
 import com.example.fooddelivery.navigation.rememberNavigationState
+import com.example.fooddelivery.retrofit.data.RegisterRequest
 import com.example.fooddelivery.ui.theme.FoodDeliveryTheme
 
 import com.example.fooddelivery.ui.theme.TextRed
 import com.example.fooddelivery.ui.theme.getDarkTheme
 import com.example.fooddelivery.ui.theme.getLightTheme
+import com.example.fooddelivery.viewmodels.MainScreenVM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun MainScreen(){
+    val mainScreenViewModel:MainScreenVM = viewModel()
+    val registrationState = mainScreenViewModel.registrationState.collectAsState()
     val navigationState = rememberNavigationState()
     val topAppBarVisibility = remember{ mutableStateOf(false) }
     val bottomBarVisibility = remember { mutableStateOf(false) }
@@ -160,7 +167,16 @@ fun MainScreen(){
                 signUpScreenContent = {
                     SignUpScreen(
                         onSignUpClick = {
-                            navigationState.navigateTo(Screens.HomeScreen.route)
+                            mainScreenViewModel.registerUser(
+                                RegisterRequest(
+                                    username = "user",
+                                    email = "user@gmail.com",
+                                    password = "user"
+                                )
+                            )
+                            if (registrationState.value=="Successful") {
+                                navigationState.navigateTo(Screens.HomeScreen.route)
+                            }
                         }
                     )
                 },

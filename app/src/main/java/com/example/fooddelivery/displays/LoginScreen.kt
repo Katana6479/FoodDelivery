@@ -1,4 +1,4 @@
-package com.example.fooddelivery.screens
+package com.example.fooddelivery.displays
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
@@ -28,6 +28,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fooddelivery.ui.theme.ButtonBorderGrey
@@ -45,7 +46,6 @@ fun LoginScreen(
     onSignInButtonClick: () -> Unit,
     onSignUpButtonClick: () -> Unit
 ){
-    val color = MaterialTheme.colorScheme.onBackground
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -238,4 +238,11 @@ fun TopText(
         )
         Box(modifier = Modifier.weight(1f))
     }
+}
+@Preview
+@Composable
+fun PreviewLogin(){
+    LoginScreen(
+        {}
+    ) { }
 }

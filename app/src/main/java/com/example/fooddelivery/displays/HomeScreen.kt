@@ -1,4 +1,4 @@
-package com.example.fooddelivery.screens
+package com.example.fooddelivery.displays
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -57,7 +57,6 @@ import com.example.fooddelivery.viewmodels.HomeViewModel
 import com.example.fooddelivery.R
 import com.example.fooddelivery.ui.theme.ColorYellow
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
-import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
 
 
