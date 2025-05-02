@@ -20,17 +20,22 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fooddelivery.ui.theme.ButtonBorderGrey
 import com.example.fooddelivery.ui.theme.ButtonTextBlack
 import com.example.fooddelivery.ui.theme.ButtonWhite
@@ -39,14 +44,19 @@ import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
 import com.example.fooddelivery.ui.theme.TextRed
+import com.example.fooddelivery.viewmodels.LoginViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(
-    onSignInButtonClick: () -> Unit,
+    onSignInButtonClick: (requestEmail:String, requestPassword:String) -> Unit,
     onSignUpButtonClick: () -> Unit
 ){
-        Column(
+    val viewModel:LoginViewModel = viewModel()
+    val userEmail = viewModel.emailState.collectAsState()
+    val userPassword = viewModel.passwordState.collectAsState()
+
+    Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 50.dp, start = 16.dp, end = 16.dp)
@@ -62,16 +72,16 @@ fun LoginScreen(
                         .weight(2f),
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("Just ")
+                            append("Просто ")
                         }
                         withStyle(style = SpanStyle(TextRed)){
-                            append("Sign in ")
+                            append("Войдите ")
                         }
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("we’ll"+"\n")
+                            append("и "+" ")
                         }
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("prepare your order")
+                            append("выберите заведение")
                         }
                     },
                     fontSize = 24.sp,
@@ -80,7 +90,7 @@ fun LoginScreen(
                 Box(modifier = Modifier.weight(1f))
             }
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(8.dp)
             )
             Row(
                 modifier = Modifier
@@ -91,7 +101,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(2f),
-                    text = " If you don’t have an account please sign up",
+                    text = "Если у вас нет аккаунта, пожалуйта зарегистрируйтесь",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.W500,
                     color = Color(0xFF646982)
@@ -102,67 +112,22 @@ fun LoginScreen(
                 modifier = Modifier.height(16.dp)
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Column {
-                    Text(
-                        text = "Email",
-                        fontWeight = FontWeight.Bold
-                    )
-                    val text = "foodhub@gmail.com"
-                    Spacer(modifier = Modifier.height(4.dp))
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = {},
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = LoginFieldColor,
-                            unfocusedBorderColor = LoginFieldBorderColor,
-                            unfocusedTextColor = LoginFieldTextColor
-                            //unfocusedContainerColor = Color(0xFFEBEBEB)
-                        )
-                    )
-                }
-            }
+            InputTextField(
+                passwordField = false,
+                headerText = "Почта",
+                placeholderText = "youremail@gmail.com",
+                viewModel = viewModel,
+                inputData = userEmail)
             Spacer(
                 modifier = Modifier.height(32.dp)
             )
-            Column (
-                modifier = Modifier
-                    .fillMaxWidth()
-            ){
-                Text(
-                    text = "Password",
-                    fontWeight = FontWeight.Bold
-                )
-                val text = "****"
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = text,
-                    onValueChange = {},
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = LoginFieldColor,
-                        unfocusedBorderColor = LoginFieldBorderColor
-                    ),
-                    visualTransformation = PasswordVisualTransformation()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.TopEnd
-                ){
-                    Text(
-                        text = "Forgot password?",
-                        color = LoginFieldTextColor
-                    )
-                }
-            }
+            InputTextField(
+                passwordField = true,
+                headerText = "Пароль",
+                placeholderText = "****",
+                viewModel = viewModel,
+                inputData = userPassword
+            )
             Spacer(
                 modifier = Modifier.height(32.dp)
             )
@@ -171,7 +136,10 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .height(53.dp),
                 onClick = {
-                    onSignInButtonClick()
+                    onSignInButtonClick(
+                        userEmail.value,
+                        userPassword.value,
+                        )
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -180,7 +148,7 @@ fun LoginScreen(
                 )
             ) {
                 Text(
-                    text = "SIGN IN",
+                    text = "Войти",
                     fontSize = 16.sp
                 )
             }
@@ -191,7 +159,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Text(
-                    text = "OR",
+                    text = "ИЛИ",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.W500
                 )
@@ -210,7 +178,7 @@ fun LoginScreen(
                     border = BorderStroke(2.dp, ButtonBorderGrey)
                 ) {
                     Text(
-                        text = "SIGN UP",
+                        text = "Регистрация",
                         fontSize = 16.sp
                     )
                 }
@@ -218,31 +186,62 @@ fun LoginScreen(
 
         }
 }
-
 @Composable
-fun TopText(
-    paddingValues: PaddingValues,
-    ){
-    Row(
+fun InputTextField(
+    passwordField:Boolean,
+    headerText:String,
+    placeholderText: String,
+    viewModel: LoginViewModel,
+    inputData: State<String>
+){
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
-            .padding(paddingValues)
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(2f),
-            text = " Just Sign in,we’ll prepar your order",
-            fontSize = 24.sp
+            text = headerText,
+            fontWeight = FontWeight.Bold
         )
-        Box(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(4.dp))
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
+                Text(text = placeholderText)
+            },
+            value = inputData.value,
+            onValueChange = {newValue->
+                if (!passwordField){
+                    viewModel.setEmail(newValue)
+                }else{
+                    viewModel.setPassword(newValue)
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = LoginFieldColor,
+                unfocusedBorderColor = LoginFieldBorderColor,
+                unfocusedTextColor = LoginFieldTextColor
+                //unfocusedContainerColor = Color(0xFFEBEBEB)
+            ),
+            visualTransformation =
+            if (passwordField)
+                PasswordVisualTransformation()
+            else
+                VisualTransformation.None,
+            maxLines = 1
+        )
+        if (passwordField){
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.TopEnd
+            ){
+                Text(
+                    text = "Забыли пароль?",
+                    color = LoginFieldTextColor
+                )
+            }
+        }
     }
 }
-@Preview
-@Composable
-fun PreviewLogin(){
-    LoginScreen(
-        {}
-    ) { }
-}
+

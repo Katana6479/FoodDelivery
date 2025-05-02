@@ -68,6 +68,8 @@ fun HomeScreen(
     val viewModel: HomeViewModel = viewModel()
     val listState = rememberLazyListState()
     val searchHistory by viewModel.searchHistory.collectAsState()
+    val textFieldState = viewModel.textFieldState.collectAsState()
+    val clearButtonVisibilityState = viewModel.clearButtonState.collectAsState()
 
     LazyColumn (
         state = listState,
@@ -79,7 +81,9 @@ fun HomeScreen(
         item {
             SearchField(
                 viewModel,
-                searchHistory
+                searchHistory,
+                textFieldState = textFieldState.value,
+                clearButtonVisibilityState = clearButtonVisibilityState.value
             )
         }
         item {
@@ -118,10 +122,12 @@ fun HomeScreen(
 @Composable
 fun SearchField(
     viewModel: HomeViewModel,
-    searchHistory: Set<String>
+    searchHistory: Set<String>,
+    textFieldState: String,
+    clearButtonVisibilityState: Boolean
+
     ){
-    val textFieldState = viewModel.textFieldState.collectAsState()
-    val clearButtonVisibilityState = viewModel.clearButtonState.collectAsState()
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val showSuggestions = remember { mutableStateOf(false) }
     Box(
@@ -132,7 +138,7 @@ fun SearchField(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            value = textFieldState.value,
+            value = textFieldState,
             placeholder = {
                 Text(text = "Найдите ресторан")
             },
@@ -151,7 +157,7 @@ fun SearchField(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (textFieldState.value != "" && clearButtonVisibilityState.value) {
+                    if (textFieldState != "" && clearButtonVisibilityState) {
                         Text(
                             text = "Сброс",
                             modifier = Modifier
@@ -174,7 +180,7 @@ fun SearchField(
                             containerColor = ColorYellow
                         ),
                         onClick = {
-                            viewModel.addSearchQuery(textFieldState.value)
+                            viewModel.addSearchQuery(textFieldState)
                             keyboardController?.hide()
                             showSuggestions.value = false
                         }

@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import com.example.fooddelivery.displays.WelcomeScreen
 import com.example.fooddelivery.navigation.AppNavGraph
 import com.example.fooddelivery.navigation.Screens
 import com.example.fooddelivery.navigation.rememberNavigationState
+import com.example.fooddelivery.retrofit.data.LoginRequest
 import com.example.fooddelivery.retrofit.data.RegisterRequest
 import com.example.fooddelivery.ui.theme.FoodDeliveryTheme
 
@@ -52,64 +54,63 @@ import com.example.fooddelivery.viewmodels.MainScreenVM
 fun MainScreen(){
     val mainScreenViewModel:MainScreenVM = viewModel()
     val registrationState = mainScreenViewModel.registrationState.collectAsState()
+    val loginState = mainScreenViewModel.loginState.collectAsState()
     val navigationState = rememberNavigationState()
-    val topAppBarVisibility = remember{ mutableStateOf(false) }
-    val bottomBarVisibility = remember { mutableStateOf(false) }
-    val isDarkTheme = remember { mutableStateOf(false) }
+    val bottomBarVisibility = mainScreenViewModel.bottomBarVisibilityState.collectAsState()
+    val isDarkTheme = mainScreenViewModel.isDarkThemeState.collectAsState()
 
-    val colorScheme = if (isDarkTheme.value) getDarkTheme else getLightTheme
 
     FoodDeliveryTheme (
         darkTheme = isDarkTheme.value
     ){
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
-                if (topAppBarVisibility.value) {
-                    TopAppBar(
-                        actions = {
-                            Icon(
-                                modifier = Modifier.size(25.dp),
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
-                        },
-                        navigationIcon = {
-                            Icon(
-                                modifier = Modifier.size(25.dp),
-                                painter = painterResource(R.drawable.positions_icon),
-                                contentDescription = null,
-                                tint = Color.Red
-
-                            )
-                        },
-                        title = {
-                            Column(
-                            ) {
-                                Box(
-                                ) {
-                                    Text(
-                                        text = "ВАША ЛОКАЦИЯ",
-                                        color = TextRed,
-                                        fontWeight = FontWeight.W400,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                                Box(
-                                ) {
-                                    Text(
-                                        text = "Москва, Красная Площадь",
-                                        color = MaterialTheme.colorScheme.onBackground,
-                                        fontWeight = FontWeight.W400,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-
-            },
+//            topBar = {
+//                if (topAppBarVisibility.value) {
+//                    TopAppBar(
+//                        actions = {
+//                            Icon(
+//                                modifier = Modifier.size(25.dp),
+//                                imageVector = Icons.Default.ArrowDropDown,
+//                                contentDescription = null
+//                            )
+//                        },
+//                        navigationIcon = {
+//                            Icon(
+//                                modifier = Modifier.size(25.dp),
+//                                painter = painterResource(R.drawable.positions_icon),
+//                                contentDescription = null,
+//                                tint = Color.Red
+//
+//                            )
+//                        },
+//                        title = {
+//                            Column(
+//                            ) {
+//                                Box(
+//                                ) {
+//                                    Text(
+//                                        text = "ВАША ЛОКАЦИЯ",
+//                                        color = TextRed,
+//                                        fontWeight = FontWeight.W400,
+//                                        fontSize = 14.sp
+//                                    )
+//                                }
+//                                Box(
+//                                ) {
+//                                    Text(
+//                                        text = "Москва, Красная Площадь",
+//                                        color = MaterialTheme.colorScheme.onBackground,
+//                                        fontWeight = FontWeight.W400,
+//                                        fontSize = 14.sp
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    )
+//                }
+//
+//            },
             bottomBar = {
                 NavigationBar {
                     val bottomItems =
@@ -156,46 +157,55 @@ fun MainScreen(){
                 },
                 loginScreenContent = {
                     LoginScreen(
-                        onSignInButtonClick = {
-                            navigationState.navigateTo(Screens.HomeScreen.route)
+                        onSignInButtonClick = {userEmailRequest, userPasswordRequest->
+                            mainScreenViewModel.loginUser(
+                                LoginRequest(
+                                    email = userEmailRequest,
+                                    password = userPasswordRequest
+                                )
+                            )
                         },
                         onSignUpButtonClick = {
                             navigationState.navigateTo(Screens.SignUpScreen.route)
                         }
                     )
+                    LaunchedEffect(loginState.value) {
+                        if (loginState.value) {
+                            navigationState.navigateTo(Screens.HomeScreen.route)
+                        }
+                    }
                 },
                 signUpScreenContent = {
                     SignUpScreen(
-                        onSignUpClick = {
+                        onSignUpClick = {username, email, password->
                             mainScreenViewModel.registerUser(
                                 RegisterRequest(
-                                    username = "user",
-                                    email = "user@gmail.com",
-                                    password = "user"
+                                    username = username,
+                                    email = email,
+                                    password = password
                                 )
                             )
-                            if (registrationState.value=="Successful") {
-                                navigationState.navigateTo(Screens.HomeScreen.route)
-                            }
                         }
                     )
+                    LaunchedEffect(registrationState.value) {
+                        if (registrationState.value) {
+                            navigationState.navigateTo(Screens.LoginScreen.route)
+                        }
+                    }
                 },
                 homeScreenContent = {
                     HomeScreen(it)
-                    topAppBarVisibility.value = true
-                    bottomBarVisibility.value = true
+                    mainScreenViewModel.setBottomBarVisibility(true)
                 },
                 profileScreenContent = {
                     ProfileScreen(it){
-                        isDarkTheme.value=!isDarkTheme.value
+                        mainScreenViewModel.setDarkThemeState(!isDarkTheme.value)
                     }
-                    topAppBarVisibility.value = true
-                    bottomBarVisibility.value = true
+                    mainScreenViewModel.setBottomBarVisibility(true)
                 },
                 favoritesScreenContent = {
                     FavoritesScreen(it)
-                    topAppBarVisibility.value = true
-                    bottomBarVisibility.value = true
+                    mainScreenViewModel.setBottomBarVisibility(true)
                 }
             )
         }

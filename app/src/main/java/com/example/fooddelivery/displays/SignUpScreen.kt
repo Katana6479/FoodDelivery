@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -20,16 +21,19 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fooddelivery.ui.theme.ColorRed
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldColor
@@ -37,22 +41,27 @@ import com.example.fooddelivery.ui.theme.LoginFieldTextColor
 import com.example.fooddelivery.ui.theme.TermsClickable
 import com.example.fooddelivery.ui.theme.TermsColor
 import com.example.fooddelivery.ui.theme.TextRed
+import com.example.fooddelivery.viewmodels.SignUpViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SignUpScreen (
-    onSignUpClick: ()-> Unit
+    onSignUpClick: ( username:String,userEmail:String, userPassword:String)-> Unit
 ){
+    val signUpViewModel:SignUpViewModel = viewModel()
+    val name = signUpViewModel.nameState.collectAsState()
+    val email = signUpViewModel.emailState.collectAsState()
+    val password = signUpViewModel.passwordState.collectAsState()
     Scaffold {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp, start = 16.dp, end = 16.dp)
+                .padding(top = 48.dp, start = 16.dp, end = 16.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
+                    .height(78.dp)
             ) {
                 Text(
                     modifier = Modifier
@@ -60,13 +69,13 @@ fun SignUpScreen (
                         .weight(2f),
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append("Let’s ")
+                            append("Простая ")
                         }
                         withStyle(style = SpanStyle(TextRed)){
-                            append("Sign you up")
+                            append("регистрация")
                         }
                         withStyle(style = SpanStyle(MaterialTheme.colorScheme.onBackground)){
-                            append(",\n" + "your meal awaits")
+                            append(",\n" + "в пару кликов")
                         }
                     },
                     fontSize = 24.sp,
@@ -86,7 +95,7 @@ fun SignUpScreen (
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(2f),
-                    text = " If you don’t have an account please sign up",
+                    text = "Нет аккаунта? Зарегистрируйтесь!",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.W500,
                     color = Color(0xFF646982)
@@ -102,20 +111,26 @@ fun SignUpScreen (
             ) {
                 Column {
                     Text(
-                        text = "Full name",
+                        text = "Имя",
                         fontWeight = FontWeight.W600,
                     )
-                    val text = "Sam Smith"
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = {},
+                        value = name.value,
+                        onValueChange = {newText->
+                            signUpViewModel.setName(newText)
+                        },
+                        placeholder = {
+                            Text(text = "Иванов Иван")
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedContainerColor = LoginFieldColor,
                             unfocusedBorderColor = LoginFieldBorderColor,
                             unfocusedTextColor = LoginFieldTextColor
-                        )
+                        ),
+                        maxLines = 1,
+                        keyboardOptions = KeyboardOptions().copy(keyboardType = KeyboardType.Text)
                     )
                 }
             }
@@ -129,20 +144,26 @@ fun SignUpScreen (
             ) {
                 Column {
                     Text(
-                        text = "Email",
+                        text = "Почта",
                         fontWeight = FontWeight.W600
                     )
-                    val text = "foodhub@gmail.com"
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = {},
+                        value = email.value,
+                        onValueChange = {newText->
+                            signUpViewModel.setEmail(newText)
+                        },
+                        placeholder = {
+                            Text(text = "yourmail@gmail.com")
+                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedContainerColor = LoginFieldColor,
                             unfocusedBorderColor = LoginFieldBorderColor,
                             unfocusedTextColor = LoginFieldTextColor
-                        )
+                        ),
+                        maxLines = 1,
+                        keyboardOptions = KeyboardOptions().copy(keyboardType = KeyboardType.Email)
                     )
                 }
             }
@@ -154,22 +175,26 @@ fun SignUpScreen (
                     .fillMaxWidth()
             ){
                 Text(
-                    text = "Password",
+                    text = "Пароль",
                     fontWeight = FontWeight.W600
                 )
-                val text = "****"
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = text,
-                    onValueChange = {},
+                    value = password.value,
+                    onValueChange = {newText->
+                        signUpViewModel.setPassword(newText)
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         unfocusedContainerColor = LoginFieldColor,
                         unfocusedBorderColor = LoginFieldBorderColor
                     ),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = PasswordVisualTransformation(),
+                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions().copy(keyboardType = KeyboardType.Password),
+                    placeholder = { Text(text="Придумайте пароль") }
                 )
             }
             Spacer(
@@ -180,7 +205,10 @@ fun SignUpScreen (
                 .fillMaxWidth()
                 .height(53.dp),
                 onClick = {
-                    onSignUpClick()
+                    onSignUpClick(
+                        name.value,
+                        email.value,
+                        password.value)
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -189,7 +217,7 @@ fun SignUpScreen (
                 )
             ) {
                 Text(
-                    text = "SIGN UP",
+                    text = "Зарегистрироваться",
                     fontSize = 16.sp
                 )
             }
@@ -200,7 +228,7 @@ fun SignUpScreen (
                 contentAlignment = Alignment.Center
             ){
                 Text(
-                    text = "By signing up, you have agreed to our",
+                    text = "Проходя регистрацию,вы принимаете",
                     color = TermsColor
                 )
             }
@@ -212,20 +240,19 @@ fun SignUpScreen (
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(TermsClickable)){
-                        append("Terms and conditions")
+                        append("Условия и Положения")
                     }
                     withStyle(style = SpanStyle(TermsColor)){
                         append(" & ")
                     }
                     withStyle(style = SpanStyle(TermsClickable)){
-                        append("Privacy policy")
+                        append("Политику конфиденциальности")
                     }
                 },
+                fontSize = 13.sp,
                 color = TermsClickable
             )
         }
-
-
         }
     }
 }

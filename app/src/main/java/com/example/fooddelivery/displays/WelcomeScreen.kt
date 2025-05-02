@@ -54,7 +54,7 @@ fun WelcomeScreen(
                 )
             ) {
                 Text(
-                    text = "Start",
+                    text = "Начать",
                     fontSize = 16.sp
                 )
             }
