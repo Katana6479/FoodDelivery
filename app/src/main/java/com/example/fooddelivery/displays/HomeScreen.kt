@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -31,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +58,7 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.example.fooddelivery.viewmodels.HomeViewModel
 import com.example.fooddelivery.R
+import com.example.fooddelivery.retrofit.data.Restaurant
 import com.example.fooddelivery.ui.theme.ColorYellow
 import com.example.fooddelivery.ui.theme.LoginFieldBorderColor
 import com.example.fooddelivery.ui.theme.LoginFieldTextColor
@@ -63,13 +67,32 @@ import com.example.fooddelivery.ui.theme.LoginFieldTextColor
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    clickedRestaurant: (Restaurant) ->Unit
 ){
     val viewModel: HomeViewModel = viewModel()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
     val listState = rememberLazyListState()
     val searchHistory by viewModel.searchHistory.collectAsState()
     val textFieldState = viewModel.textFieldState.collectAsState()
     val clearButtonVisibilityState = viewModel.clearButtonState.collectAsState()
+    val restaurants by viewModel.restaurants.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    error?.let {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = it, color = MaterialTheme.colorScheme.error)
+        }
+        return
+    }
 
     LazyColumn (
         state = listState,
@@ -86,6 +109,26 @@ fun HomeScreen(
                 clearButtonVisibilityState = clearButtonVisibilityState.value
             )
         }
+        item{
+            selectedCategory?.let { category ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Категория: $category",
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(
+                        onClick = { viewModel.resetCategoryFilter() }
+                    ) {
+                        Text("Сбросить")
+                    }
+                }
+            }
+        }
         item {
             Row (
                 modifier = Modifier
@@ -94,15 +137,15 @@ fun HomeScreen(
             ){
                 DisplayImage(
                     link = "https://eda.yandex/images/1380157/fd0b8c91c2c2a137020053cb3c35c37c-1100x825.jpg",
-                    categoryName = "Бургеры"
+                    categoryName = "Высокая кухня"
                 )
                 DisplayImage(
                     link = "https://eda.yandex/images/3377781/0bd6643e4c33621295ef9862e55f95d7-1100x825.jpg",
-                    categoryName = "Суши"
+                    categoryName = "Роллы"
                 )
                 DisplayImage(
                     link = "https://cdn.kobo.com/book-images/cccc79b9-58cc-488a-a2a0-6db53b84114f/1200/1200/False/the-healthy-90.jpg",
-                    categoryName = "Рыба"
+                    categoryName = "Стейки"
                 )
                 DisplayImage(
                     link = "https://images.deliveryhero.io/image/fd-pk/LH/lbex-hero.jpg",
@@ -110,13 +153,16 @@ fun HomeScreen(
                 )
             }
         }
-        items(10){
+
+        items(restaurants.size, {it}){restaurantId->
+            val restaurant = restaurants[restaurantId]
             RestaurantCard(
-                link = "https://s3-alpha-sig.figma.com/img/9fb1/7973/baf6df6d95b6eec91309822538dce32c?Expires=1743379200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=IXYixta32L6Es7ajoPMbwcjiWlEJaX0s5Rx9e1iLodXwpEthBg6E4Du0bC-S5kzXg8cZzvlxXLOR5izYOkgTF6e3RD3DcIfEudHxGbDZoEHLRB0uMffyO4l2cBsVXwhfHz8TZ23cWbSShvnIpwzKp3URUO1hUbyeZR1TRV7Zb4uaxc~PX7U2m7i2ET6FnUv9RhBuFxwNp0pvDgBIijDaisoVC12VTCqRLxhOCULay3Tu8fKAkNbXQvldfVd8PkjX8b2C8tFN~gQQJj6vhO2sIiZ~QEZ-2wfbYJXj7QssIL~VdHIpNmn1ohIBUJIA1fiHlaKtr-7zwUI73lKuWoYYEA__"
+                restaurant = restaurant,
+                onRestaurantClick =  clickedRestaurant
             )
         }
-
     }
+
 }
 
 @Composable
@@ -165,6 +211,7 @@ fun SearchField(
                                 .clickable(
                                     onClick = {
                                         viewModel.updateTextFieldState("")
+                                        viewModel.resetSearch()
                                         keyboardController?.hide()
                                         showSuggestions.value = false
                                     }
@@ -234,16 +281,22 @@ fun SearchField(
 }
 @Composable
 fun RestaurantCard(
-    link:String
+    restaurant: Restaurant,
+    onRestaurantClick: (Restaurant) -> Unit
 ){
     val cardImagePainter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
-            .data(link)
+            .data(restaurant.link)
             .transformations(RoundedCornersTransformation(12F))
             .build()
     )
     Spacer(Modifier.height(16.dp))
     Card (
+        modifier = Modifier
+            .clickable (
+                enabled = true,
+                onClick = {onRestaurantClick(restaurant)}
+            )
     ){
         Column(
         ){
@@ -259,7 +312,7 @@ fun RestaurantCard(
             Text(
                 modifier = Modifier
                     .padding(start = 2.dp),
-                text = "Золотой ресторан",
+                text = restaurant.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W600
             )
@@ -269,7 +322,7 @@ fun RestaurantCard(
             Text(
                 modifier = Modifier
                     .padding(start = 2.dp),
-                text = "Китайский",
+                text = restaurant.category,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.W400
             )
@@ -282,7 +335,7 @@ fun RestaurantCard(
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Text(
-                    text = "4.0"
+                    text = restaurant.rating.toString()
                 )
                 Icon(painter = painterResource(R.drawable.baseline_star_rate_24),
                     contentDescription = null)
@@ -312,8 +365,9 @@ fun RestaurantCard(
 
 @Composable
 fun DisplayImage(
-    link:String,
-    categoryName: String
+    link: String,
+    categoryName: String,
+    viewModel: HomeViewModel = viewModel()
 ) {
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
@@ -321,25 +375,22 @@ fun DisplayImage(
             .transformations(RoundedCornersTransformation(12F))
             .build()
     )
-    Column {
+
+    Column(
+        modifier = Modifier.clickable {
+            viewModel.filterByCategory(categoryName)
+        }
+    ) {
         Image(
             painter = painter,
             contentDescription = null,
-            modifier = Modifier
-                .size(56.dp)
+            modifier = Modifier.size(56.dp)
         )
         Text(
-            modifier = Modifier
-                .width(58.dp),
+            modifier = Modifier.width(60.dp),
             text = categoryName,
             textAlign = TextAlign.Center,
             fontSize = 14.sp
         )
     }
-
-}
-@Preview
-@Composable
-fun PreviewHome(){
-    HomeScreen(paddingValues = PaddingValues(16.dp))
 }

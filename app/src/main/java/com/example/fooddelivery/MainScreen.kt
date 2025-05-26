@@ -33,6 +33,7 @@ import com.example.fooddelivery.displays.FavoritesScreen
 import com.example.fooddelivery.displays.HomeScreen
 import com.example.fooddelivery.displays.LoginScreen
 import com.example.fooddelivery.displays.ProfileScreen
+import com.example.fooddelivery.displays.RestaurantInfo
 import com.example.fooddelivery.displays.SignUpScreen
 import com.example.fooddelivery.displays.WelcomeScreen
 import com.example.fooddelivery.navigation.AppNavGraph
@@ -194,8 +195,14 @@ fun MainScreen(){
                     }
                 },
                 homeScreenContent = {
-                    HomeScreen(it)
+                    HomeScreen(it,
+                        clickedRestaurant = {clickedRestaurant->
+                        navigationState.navigateToInfo(clickedRestaurant)
+                        })
                     mainScreenViewModel.setBottomBarVisibility(true)
+                },
+                restaurantInfoContent = {restaurant->
+                    RestaurantInfo(restaurant = restaurant)
                 },
                 profileScreenContent = {
                     ProfileScreen(it){

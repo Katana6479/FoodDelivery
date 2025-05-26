@@ -7,17 +7,13 @@ import androidx.navigation.navigation
 
 
 fun NavGraphBuilder.mainScreenNavGraph(
-    homeScreenContent: @Composable () ->Unit,
     profileScreenContent: @Composable ()->Unit,
-    favoritesScreenContent: @Composable () ->Unit
+    favoritesScreenContent: @Composable () ->Unit,
 ){
     navigation(
-        startDestination =Screens.HomeScreen.route,
+        startDestination =Screens.ProfileScreen.route,
         route = Screens.MainGraph.route
     ){
-        composable(Screens.HomeScreen.route){
-            homeScreenContent()
-        }
         composable(Screens.ProfileScreen.route){
             profileScreenContent()
         }

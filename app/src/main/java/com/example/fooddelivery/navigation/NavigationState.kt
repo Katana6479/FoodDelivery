@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.fooddelivery.retrofit.data.Restaurant
 
 class NavigationState(
     val navHostController: NavHostController
@@ -19,6 +20,9 @@ class NavigationState(
             launchSingleTop= true
             restoreState = true
         }
+    }
+    fun navigateToInfo(restaurant: Restaurant){
+        navHostController.navigate(Screens.RestaurantInfo.getRouteWithArgs(restaurant))
     }
 
 }
